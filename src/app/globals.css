@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* Brand palette sampled straight off the Fleet Vaults logo:
+   #16294B navy (vehicles + "Fleet"), #1E90FF electric blue (pin + glow),
+   #8E959C brushed silver ("Vaults"). Everything else is a shade of those three. */
+@theme {
+  --color-navy-950: #070d1a;
+  --color-navy-900: #0d1729;
+  --color-navy-800: #16294b;
+  --color-navy-700: #1f3765;
+  --color-navy-600: #2a4880;
+
+  --color-signal-300: #7cc4ff;
+  --color-signal-400: #4fb0f7;
+  --color-signal-500: #1e90ff;
+  --color-signal-600: #0b5fc0;
+
+  --color-silver-300: #ccd2d8;
+  --color-silver-400: #8e959c;
+  --color-silver-500: #6b737c;
+
+  /* Semantic roles — components reference these, never raw colors.
+     Retheming the site means editing this block and nothing else. */
+  --color-ink: var(--color-navy-800); /* headings */
+  --color-body: #4d5a6b; /* paragraphs */
+  --color-muted: #7b8794; /* captions, labels */
+  --color-surface: #ffffff; /* cards */
+  --color-canvas: #f4f7fa; /* page background */
+  --color-subtle: #e9eff5; /* alternating sections, chips */
+  --color-line: #dde5ee; /* borders */
+  --color-accent: var(--color-signal-600); /* blue that stays legible on light */
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-body);
+}
+
+/* Focus ring that stays visible against the light background. */
+:focus-visible {
+  outline: 2px solid var(--color-signal-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
