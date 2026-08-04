@@ -79,6 +79,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/terms-and-conditions"
+                  className="text-sm text-body hover:text-ink"
+                >
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:info@fleetvaults.com"
                   className="text-sm text-body hover:text-ink"
