@@ -71,6 +71,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/privacy-policy"
+                  className="text-sm text-body hover:text-ink"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
                 <a
                   href="mailto:info@fleetvaults.com"
                   className="text-sm text-body hover:text-ink"

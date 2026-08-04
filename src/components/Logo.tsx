@@ -1,13 +1,14 @@
 import Image from "next/image";
-import logo from "../../public/brand/logo-horizontal.png";
+import logo from "../../public/brand/fleet-logo-trimmed.png";
 
 type Size = "sm" | "md" | "lg";
 
-/** Heights only — width follows the lockup's own 5.31:1 ratio. */
+/** Heights only — width follows the lockup's own ~4.5:1 ratio.
+    Header (sm) goes larger on wider screens so the tagline stays legible. */
 const heights: Record<Size, string> = {
-  sm: "h-11",
-  md: "h-14",
-  lg: "h-16",
+  sm: "h-12 sm:h-16",
+  md: "h-16",
+  lg: "h-20",
 };
 
 export default function Logo({
