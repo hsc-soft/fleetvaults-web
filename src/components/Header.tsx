@@ -33,6 +33,9 @@ export default function Header() {
     setMenuOpen(false);
   }
 
+  // The admin section has its own chrome — no public header there.
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/85 backdrop-blur">
       <Container className="flex h-20 items-center justify-between gap-4">

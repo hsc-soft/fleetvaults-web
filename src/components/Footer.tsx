@@ -1,10 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Container from "./Container";
 import Logo from "./Logo";
 import { solutions } from "@/lib/solutions";
 import { productCategories } from "@/lib/products";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  // The admin section has its own chrome — no public footer there.
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer className="mt-16 border-t border-line bg-surface">
       <Container className="py-10">
