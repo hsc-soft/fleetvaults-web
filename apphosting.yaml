@@ -43,7 +43,10 @@ env:
     availability:
       - RUNTIME
 
-  - variable: FIREBASE_DB_SECRET
-    secret: FIREBASE_DB_SECRET
-    availability:
-      - RUNTIME
+  # FIREBASE_DB_SECRET is deliberately absent: it is unset in .env.local too, so
+  # the RTDB is read with no auth token (see authSuffix in lib/firebase-rtdb.ts).
+  # If the database rules are ever locked down, create the secret and add:
+  #   - variable: FIREBASE_DB_SECRET
+  #     secret: FIREBASE_DB_SECRET
+  #     availability:
+  #       - RUNTIME

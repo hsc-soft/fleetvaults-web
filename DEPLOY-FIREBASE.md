@@ -59,7 +59,10 @@ npx firebase-tools apphosting:backends:create --project fleetvaultsgps
 
 Answer the prompts:
 
-- **Region** — `asia-south1` (Mumbai), closest to the users and to the EC2 box.
+- **Region** — `asia-southeast1` (Singapore). App Hosting has no India region; the
+  options are us-central1, us-east4, us-east5, asia-east1, asia-southeast1 and
+  europe-west4. Note the Realtime Database sits in us-central1, so admin reads
+  cross the Pacific from Singapore.
 - **Backend ID** — `fleetvaults-web`. This must match `backendId` in
   `firebase.json`, or `firebase deploy` will not find it.
 - **GitHub connection** — optional. Connecting `hsc-soft/fleetvaults-web` gives
@@ -67,23 +70,25 @@ Answer the prompts:
 
 ## 4. Load the secrets
 
-Three values from `.env.local` go into Cloud Secret Manager. Each command prompts
+Two values from `.env.local` go into Cloud Secret Manager. Each command prompts
 for the value — paste it, it is not echoed:
 
 ```bash
 npx firebase-tools apphosting:secrets:set RESEND_API_KEY
 npx firebase-tools apphosting:secrets:set ADMIN_SESSION_SECRET
-npx firebase-tools apphosting:secrets:set FIREBASE_DB_SECRET
 ```
 
-Say **no** when asked to add the reference to `apphosting.yaml` — all three are
+Say **no** when asked to add the reference to `apphosting.yaml` — both are
 already declared there.
+
+`FIREBASE_DB_SECRET` is not in the list: it is unset in `.env.local`, so the
+Realtime Database is read without an auth token, exactly as on EC2.
 
 Then let the backend read them:
 
 ```bash
 npx firebase-tools apphosting:secrets:grantaccess \
-  RESEND_API_KEY,ADMIN_SESSION_SECRET,FIREBASE_DB_SECRET \
+  RESEND_API_KEY,ADMIN_SESSION_SECRET \
   --backend fleetvaults-web
 ```
 
