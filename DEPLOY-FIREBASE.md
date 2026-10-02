@@ -82,9 +82,9 @@ already declared there.
 Then let the backend read them:
 
 ```bash
-npx firebase-tools apphosting:secrets:grantaccess RESEND_API_KEY --backend fleetvaults-web
-npx firebase-tools apphosting:secrets:grantaccess ADMIN_SESSION_SECRET --backend fleetvaults-web
-npx firebase-tools apphosting:secrets:grantaccess FIREBASE_DB_SECRET --backend fleetvaults-web
+npx firebase-tools apphosting:secrets:grantaccess \
+  RESEND_API_KEY,ADMIN_SESSION_SECRET,FIREBASE_DB_SECRET \
+  --backend fleetvaults-web
 ```
 
 `ADMIN_SESSION_SECRET` must be **the same value as on EC2** while both are live —
