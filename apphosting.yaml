@@ -1,0 +1,49 @@
+# Firebase App Hosting — runtime and build configuration.
+# Secrets live in Cloud Secret Manager and are only referenced by name here,
+# so this file is safe to commit. Create them with:
+#   firebase apphosting:secrets:set RESEND_API_KEY
+#   firebase apphosting:secrets:set ADMIN_SESSION_SECRET
+#   firebase apphosting:secrets:set FIREBASE_DB_SECRET
+
+runConfig:
+  # Marketing site plus a small admin panel — scale to zero when idle, and cap
+  # the ceiling so a traffic spike (or a crawl) cannot run up a large bill.
+  minInstances: 0
+  maxInstances: 5
+  cpu: 1
+  memoryMiB: 512
+  concurrency: 80
+
+env:
+  # Public configuration. Plain values, readable in the repo.
+  - variable: FIREBASE_DATABASE_URL
+    value: https://fleetvaultsgps-default-rtdb.firebaseio.com
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: CONTACT_TO
+    value: info@fleetvaults.com
+    availability:
+      - RUNTIME
+
+  - variable: CONTACT_FROM
+    value: Fleet Vaults <noreply@fleetvaults.com>
+    availability:
+      - RUNTIME
+
+  # Secrets. RUNTIME only — the build never needs to read them.
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+
+  - variable: ADMIN_SESSION_SECRET
+    secret: ADMIN_SESSION_SECRET
+    availability:
+      - RUNTIME
+
+  - variable: FIREBASE_DB_SECRET
+    secret: FIREBASE_DB_SECRET
+    availability:
+      - RUNTIME
