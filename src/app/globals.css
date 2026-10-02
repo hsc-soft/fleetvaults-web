@@ -46,6 +46,46 @@ body {
   border-radius: 4px;
 }
 
+/* Invoice printing: only the bill sheet reaches the paper. Chrome is removed
+   with `display: none` rather than `visibility: hidden` — hidden elements keep
+   their height and would push blank pages out after the bill. */
+@media print {
+  /* Zero page margin leaves the browser no room to draw its own header and
+     footer (date, title, URL, page number), so they are dropped. The white
+     border the bill needs is put back as padding on the sheet below. */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* The app shell stretches to the viewport; on paper let content decide. */
+  html,
+  body {
+    height: auto;
+    min-height: 0;
+    background: #fff;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-sheet {
+    max-width: none;
+    /* Stands in for the @page margin given up above. */
+    padding: 10mm;
+    /* Keep the header tints and rules the format relies on. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Never split a row across pages. */
+  .print-sheet tr,
+  .print-sheet thead {
+    break-inside: avoid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -1,6 +1,9 @@
 // Reads the Firebase Realtime Database over REST (server-side only).
 // Works with public read rules, or with a legacy DB secret once rules are locked.
 
+import { formatInvoiceNo, invoicePeriod, invoiceSerial } from "./invoice";
+import type { Invoice, InvoiceInput, InvoiceItem } from "./invoice";
+
 const DB_URL = process.env.FIREBASE_DATABASE_URL;
 const DB_SECRET = process.env.FIREBASE_DB_SECRET;
 
@@ -233,6 +236,151 @@ export async function getDevices(): Promise<Device[]> {
         vendorName: d.vendorId && vendorsData ? vendorsData[d.vendorId]?.firmName : undefined,
       };
     });
+}
+
+/** Firebase stores arrays as numeric-keyed objects — normalise both shapes. */
+function toArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value.filter((entry) => entry != null);
+  if (value && typeof value === "object") return Object.values(value);
+  return [];
+}
+
+function toItems(value: unknown): InvoiceItem[] {
+  return toArray(value).map((entry) => {
+    const item = (entry ?? {}) as Partial<InvoiceItem>;
+    return {
+      name: String(item.name ?? ""),
+      hsn: String(item.hsn ?? ""),
+      qty: Number(item.qty ?? 0),
+      unit: String(item.unit ?? "PCS"),
+      rate: Number(item.rate ?? 0),
+      taxRate: Number(item.taxRate ?? 0),
+    };
+  });
+}
+
+function toInvoice(id: string, data: Partial<InvoiceInput>): Invoice {
+  const str = (value: unknown) => String(value ?? "");
+  return {
+    id,
+    invoiceNo: str(data.invoiceNo),
+    invoiceDate: str(data.invoiceDate),
+    dueDate: str(data.dueDate),
+    billName: str(data.billName),
+    billAddress: str(data.billAddress),
+    billGstin: str(data.billGstin),
+    billMobile: str(data.billMobile),
+    placeOfSupply: str(data.placeOfSupply),
+    shipSame: data.shipSame !== false,
+    shipName: str(data.shipName),
+    shipAddress: str(data.shipAddress),
+    items: toItems(data.items),
+    discount: Number(data.discount ?? 0),
+    receivedAmount: Number(data.receivedAmount ?? 0),
+    notes: str(data.notes),
+    status: (data.status ?? "unpaid") as Invoice["status"],
+    createdAt: str(data.createdAt),
+  };
+}
+
+/** Reads /Invoices, newest first. */
+export async function getInvoices(): Promise<Invoice[]> {
+  const data = await readPath<Record<string, unknown>>("Invoices");
+  if (!data) return [];
+
+  return Object.entries(data)
+    .filter(([key, value]) => key !== "lastKey" && value !== null && typeof value === "object")
+    .map(([id, value]) => toInvoice(id, value as Partial<InvoiceInput>))
+    .sort((a, b) => Number(b.id) - Number(a.id));
+}
+
+export async function getInvoice(id: string): Promise<Invoice | null> {
+  const data = await readPath<Partial<InvoiceInput>>(`Invoices/${id}`);
+  if (!data || typeof data !== "object") return null;
+  return toInvoice(id, data);
+}
+
+/** Suggests the next invoice number: this month's highest serial plus one.
+    Derived from the stored numbers rather than a counter, so a hand-edited or
+    deleted invoice can't leave the sequence stranded. */
+export async function nextInvoiceNumber(): Promise<string> {
+  const period = invoicePeriod();
+  const invoices = await getInvoices();
+
+  const highest = invoices.reduce((max, invoice) => {
+    const serial = invoiceSerial(invoice.invoiceNo, period);
+    return serial !== null && serial > max ? serial : max;
+  }, 0);
+
+  return formatInvoiceNo(period, highest + 1);
+}
+
+/** The id of an invoice already using this number, or null. `exceptId` lets an
+    edit keep its own number without colliding with itself. */
+export async function findInvoiceByNumber(
+  invoiceNo: string,
+  exceptId?: string,
+): Promise<string | null> {
+  const wanted = invoiceNo.trim().toLowerCase();
+  if (!wanted) return null;
+
+  const invoices = await getInvoices();
+  const clash = invoices.find(
+    (invoice) =>
+      invoice.id !== exceptId && invoice.invoiceNo.trim().toLowerCase() === wanted,
+  );
+  return clash?.id ?? null;
+}
+
+export async function createInvoice(input: InvoiceInput): Promise<string> {
+  const lastKey = Number((await readPath<number>("Invoices/lastKey")) ?? 0);
+  const newKey = lastKey + 1;
+  await writePath(`Invoices/${newKey}`, input);
+  await writePath("Invoices/lastKey", newKey);
+  return String(newKey);
+}
+
+export async function updateInvoice(id: string, input: InvoiceInput): Promise<void> {
+  await writePath(`Invoices/${id}`, input);
+}
+
+export async function deleteInvoice(id: string): Promise<void> {
+  await deletePath(`Invoices/${id}`);
+}
+
+/** Builds a storable invoice from a form/JSON body, coercing every field. */
+export function invoiceInputFromBody(body: Record<string, unknown>): InvoiceInput {
+  const str = (key: string) => String(body?.[key] ?? "").trim();
+  const num = (key: string) => {
+    const value = Number(body?.[key]);
+    return Number.isFinite(value) ? value : 0;
+  };
+
+  const items = toItems(body?.items)
+    // Drop blank rows the form may have left behind.
+    .filter((item) => item.name || item.rate || item.hsn);
+
+  const shipSame = body?.shipSame !== false && body?.shipSame !== "false";
+
+  return {
+    invoiceNo: str("invoiceNo"),
+    invoiceDate: str("invoiceDate"),
+    dueDate: str("dueDate"),
+    billName: str("billName"),
+    billAddress: str("billAddress"),
+    billGstin: str("billGstin"),
+    billMobile: str("billMobile"),
+    placeOfSupply: str("placeOfSupply"),
+    shipSame,
+    shipName: shipSame ? str("billName") : str("shipName"),
+    shipAddress: shipSame ? str("billAddress") : str("shipAddress"),
+    items,
+    discount: num("discount"),
+    receivedAmount: num("receivedAmount"),
+    notes: str("notes"),
+    status: (str("status") || "unpaid") as InvoiceInput["status"],
+    createdAt: str("createdAt") || new Date().toISOString(),
+  };
 }
 
 export type AdminCheck =

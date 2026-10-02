@@ -14,7 +14,7 @@ export default function Footer() {
   if (pathname.startsWith("/admin")) return null;
 
   return (
-    <footer className="mt-16 border-t border-line bg-surface">
+    <footer className="no-print mt-16 border-t border-line bg-surface">
       <Container className="py-10">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div className="sm:col-span-2">

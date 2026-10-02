@@ -40,6 +40,16 @@ const nav: NavItem[] = [
     ),
   },
   {
+    href: "/admin/invoices",
+    label: "Invoices",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M6 2h9l4 4v16l-3-2-3 2-3-2-3 2V2z" />
+        <path d="M9 8h6M9 12h6M9 16h3" />
+      </svg>
+    ),
+  },
+  {
     href: "/admin/vendors",
     label: "Vendors",
     icon: (
@@ -107,13 +117,13 @@ export default function AdminChrome({ children }: { children: React.ReactNode })
   return (
     <div className="flex min-h-screen bg-canvas">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex">
+      <aside className="no-print sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-line bg-surface lg:flex">
         {sidebarInner()}
       </aside>
 
       {/* Mobile drawer */}
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="no-print fixed inset-0 z-50 lg:hidden">
           <div
             className="absolute inset-0 bg-navy-950/40"
             onClick={() => setOpen(false)}
@@ -127,7 +137,7 @@ export default function AdminChrome({ children }: { children: React.ReactNode })
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-6">
+        <header className="no-print flex h-16 items-center gap-3 border-b border-line bg-surface px-4 lg:px-6">
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -149,7 +159,7 @@ export default function AdminChrome({ children }: { children: React.ReactNode })
           <span className="text-sm font-semibold text-ink">Admin Panel</span>
         </header>
 
-        <div className="flex-1 p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0">{children}</div>
       </div>
     </div>
   );
